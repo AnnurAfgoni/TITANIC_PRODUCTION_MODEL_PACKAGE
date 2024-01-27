@@ -23,50 +23,45 @@ from feature_engine.encoding import(
     OneHotEncoder
 )
 
-# CONFIGURATION VARIABLE
-NUMERICAL_VARIABLES = [
-    "age",
-    "fare"
-]
-
-CATEGORICAL_VARIABLES = [
-    "sex",
-    "cabin",
-    "embarked",
-    "title"
-]
-
-CABIN = [
-    "cabin"
-]
+# config
+from classification_model.config.core import config
 
 # PIPELINE
 titanic_pipe = Pipeline([
     # IMPUTATION
     ("categorical_imputation", CategoricalImputer(
-        imputation_method="missing", variables=CATEGORICAL_VARIABLES
+        imputation_method="missing", 
+        variables=config.model_config.categorical_variables
     )),
     ("missing_indicator", AddMissingIndicator(
-        variables=NUMERICAL_VARIABLES
+        variables=config.model_config.numerical_variables
     )),
     ("median_imputation", MeanMedianImputer(
-        imputation_method="median", variables=NUMERICAL_VARIABLES
+        imputation_method="median", 
+        variables=config.model_config.numerical_variables
     )),
 
     # EXTRACT LETTER
-    ("extract_letter", pp.ExtractLetterTransformer(variables=CABIN)),
+    ("extract_letter", pp.ExtractLetterTransformer(
+        variables=config.model_config.cabin
+    )),
 
     # CATEGORICAL ENCODING
     ("rare_label_encoder", RareLabelEncoder(
-        tol=0.05, n_categories=1, variables=CATEGORICAL_VARIABLES
+        tol=0.05, n_categories=1, 
+        variables=config.model_config.categorical_variables
     )),
     ("categorical_encoder", OneHotEncoder(
-        drop_last=True, variables=CATEGORICAL_VARIABLES
+        drop_last=True, 
+        variables=config.model_config.categorical_variables
     )),
 
     # scaling
     ("scaler", StandardScaler()),
 
     # Model
-    ("Logreg", LogisticRegression(C=0.0005, random_state=0))
+    ("Logreg", LogisticRegression(
+        C=config.model_config.param_c, 
+        random_state=config.model_config.random_state
+    ))
 ])
