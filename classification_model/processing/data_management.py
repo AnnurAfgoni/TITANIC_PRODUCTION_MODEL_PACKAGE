@@ -1,24 +1,26 @@
-import pandas as pd
-
-from sklearn.pipeline import Pipeline
 import joblib
+import pandas as pd
+from sklearn.pipeline import Pipeline
 
-from classification_model.config import config
+from classification_model import __version__ as _version
+from classification_model.config.core import (
+    DATASET_DIR,
+    TRAINED_MODEL_DIR,
+    config
+)
 
 def load_dataset(*, file_name: str) -> pd.DataFrame:
-    _data = pd.read_csv(f"{config.DATASET_DIR}/{file_name}")
+    _data = pd.read_csv(Path(f"{config.DATASET_DIR}/{file_name}"))
     return _data
 
-def save_pipeline(*, pipeline_to_persist) -> None:
+def save_pipeline(*, pipeline_to_persist: Pipeline) -> None:
 
-    save_file_name = "titanic_classification_model.pkl"
-    save_path = config.TRAINED_MODEL_DIR / save_file_name
+    save_file_name = f"{config.app_config.pipeline_save_file}{_version}.pkl"
+    save_path = TRAINED_MODEL_DIR / save_file_name
     joblib.dump(pipeline_to_persist, save_path)
-
-    print("saved pipeline")
 
 def load_pipeline(*, file_name: str) -> Pipeline:
 
-    file_path = config.TRAINED_MODEL_DIR/file_name
-    saved_pipeline = joblib.load(filename=file_path)
-    return saved_pipeline
+    file_path = TRAINED_MODEL_DIR/file_name
+    trained_model = joblib.load(filename=file_path)
+    return trained_model
